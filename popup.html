@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <title>Invite All</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <header>
+    <img src="icons/icon48.png" alt="" width="28" height="28" />
+    <div>
+      <h1>הזמנת כולם</h1>
+      <p class="sub">לאירועים בפייסבוק</p>
+    </div>
+  </header>
+
+  <section id="not-fb" hidden>
+    <p class="empty">פתח את דף האירוע בפייסבוק, לחץ על <b>Invite</b> ואז חזור לכאן.</p>
+  </section>
+
+  <section id="main" hidden>
+    <div class="status" id="status-line">
+      <span class="dot"></span><span id="status-text">בודק…</span>
+    </div>
+    <div class="stats">
+      <div class="stat"><span class="num" id="selected">0</span><span class="lbl">סומנו</span></div>
+      <div class="stat"><span class="num" id="left">—</span><span class="lbl">הזמנות נותרו</span></div>
+    </div>
+    <p class="msg" id="msg"></p>
+    <button id="go" class="go">סמן את כולם</button>
+  </section>
+
+  <details id="settings">
+    <summary>הגדרות</summary>
+    <label>השהיה בין לחיצות (ms)<input type="number" id="clickDelay" min="0" max="2000" step="5" /></label>
+    <label>המתנה אחרי גלילה (ms)<input type="number" id="scrollDelay" min="0" max="5000" step="50" /></label>
+    <label>סבבים בלי שינוי עד עצירה<input type="number" id="idleRounds" min="1" max="30" step="1" /></label>
+    <label>מקסימום לסמן (0 = בלי הגבלה)<input type="number" id="maxSelect" min="0" step="1" /></label>
+    <label class="check"><input type="checkbox" id="showPanel" />להציג חלונית צפה ליד חלון ההזמנות</label>
+    <button id="reset" class="link">איפוס לברירת מחדל</button>
+  </details>
+
+  <footer>קיצור מקלדת: <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>I</kbd></footer>
+  <script src="popup.js"></script>
+</body>
+</html>

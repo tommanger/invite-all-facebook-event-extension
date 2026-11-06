@@ -1,0 +1,41 @@
+{
+  "manifest_version": 3,
+  "name": "Invite All – הזמנת כולם לאירוע",
+  "short_name": "Invite All",
+  "version": "1.0.0",
+  "description": "מסמן בלחיצה אחת את כל העוקבים בחלון ההזמנות של אירוע בפייסבוק.",
+  "permissions": ["storage", "scripting"],
+  "host_permissions": ["https://*.facebook.com/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Invite All",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*.facebook.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "commands": {
+    "toggle-invite": {
+      "suggested_key": { "default": "Alt+Shift+I" },
+      "description": "התחל / עצור סימון כולם"
+    }
+  }
+}
