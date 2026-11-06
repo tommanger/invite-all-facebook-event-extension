@@ -1,4 +1,4 @@
-const DEFAULTS = { clickDelay: 20, scrollDelay: 100, idleRounds: 3, maxSelect: 0, showPanel: true };
+const DEFAULTS = { clickDelay: 20, loadTimeout: 6000, idleRounds: 2, maxSelect: 0, showPanel: true };
 const FB_URL = /^https:\/\/([a-z0-9-]+\.)*facebook\.com\//i;
 const $ = (id) => document.getElementById(id);
 
@@ -53,7 +53,7 @@ $('go').addEventListener('click', async () => {
 });
 
 // ---------- Settings ----------
-const NUM_KEYS = ['clickDelay', 'scrollDelay', 'idleRounds', 'maxSelect'];
+const NUM_KEYS = ['clickDelay', 'loadTimeout', 'idleRounds', 'maxSelect'];
 
 async function loadSettings() {
   const s = await chrome.storage.sync.get(DEFAULTS);

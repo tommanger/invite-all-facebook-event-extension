@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Invite All – הזמנת כולם לאירוע",
   "short_name": "Invite All",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "מסמן בלחיצה אחת את כל העוקבים בחלון ההזמנות של אירוע בפייסבוק.",
   "permissions": ["storage", "scripting"],
   "host_permissions": ["https://*.facebook.com/*"],

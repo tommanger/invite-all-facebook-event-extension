@@ -8,11 +8,11 @@
   document.dispatchEvent(new CustomEvent(TAKEOVER_EVENT));
 
   const DEFAULTS = {
-    clickDelay: 20,   // ms between checkbox clicks
-    scrollDelay: 100, // ms to wait after scrolling for more people to load
-    idleRounds: 3,    // rounds with nothing new before deciding the list ended
-    maxSelect: 0,     // 0 = no limit (Facebook's own limit still applies)
-    showPanel: true,  // floating panel next to the invite dialog
+    clickDelay: 20,    // ms between checkbox clicks
+    loadTimeout: 6000, // max ms to wait for Facebook to load the next batch (~0.6s normally)
+    idleRounds: 2,     // failed load attempts in a row before deciding the list ended
+    maxSelect: 0,      // 0 = no limit (Facebook's own limit still applies)
+    showPanel: true,   // floating panel next to the invite dialog
   };
 
   let settings = { ...DEFAULTS };
@@ -79,6 +79,36 @@
     cb.getAttribute('aria-disabled') !== 'true' &&
     !clicked.has(cb);
 
+  const hasPending = (dialog, clicked) =>
+    [...dialog.querySelectorAll('[role="checkbox"]')].some((cb) => isPending(cb, clicked));
+
+  // Facebook shows a "Loading..." element at the bottom of the list while it fetches more.
+  const isLoading = (dialog) =>
+    !!dialog.querySelector('[data-visualcompletion="loading-state"], [role="progressbar"]');
+
+  function scrollToBottom(dialog) {
+    const scroller = getScrollContainer(dialog);
+    if (scroller) scroller.scrollTop = scroller.scrollHeight;
+  }
+
+  // Scroll to the bottom and wait until new people show up.
+  // Returns true if more people loaded, false if the list seems to have ended.
+  async function loadMore(dialog, clicked) {
+    const before = dialog.querySelectorAll('[role="checkbox"]').length;
+    scrollToBottom(dialog);
+    const start = Date.now();
+    while (Date.now() - start < settings.loadTimeout) {
+      await sleep(100);
+      if (stopRequested || !alive || !dialog.isConnected) return false;
+      const now = dialog.querySelectorAll('[role="checkbox"]').length;
+      if (now > before || hasPending(dialog, clicked)) return true;
+      // Nothing is loading and nothing new after a moment -> end of the list.
+      if (!isLoading(dialog) && Date.now() - start > 1500) return false;
+      scrollToBottom(dialog); // keep nudging in case the list grew/re-rendered
+    }
+    return false;
+  }
+
   // ---------- Main loop ----------
 
   async function run() {
@@ -120,18 +150,16 @@
         await sleep(settings.clickDelay);
       }
 
-      // Scroll to the bottom so Facebook loads the next chunk of people.
-      const scroller = getScrollContainer(dialog);
-      if (scroller) scroller.scrollTop = scroller.scrollHeight;
-      const all = dialog.querySelectorAll('[role="checkbox"]');
-      all[all.length - 1]?.scrollIntoView({ block: 'end' });
-      await sleep(settings.scrollDelay);
+      if (stopRequested || !alive || limitReached()) break;
 
-      const pending = [...dialog.querySelectorAll('[role="checkbox"]')].some((cb) => isPending(cb, clicked));
-      if (batch.length === 0 && !pending) {
-        if (++idle >= settings.idleRounds) break;
-      } else {
+      // Scroll to the bottom and wait for Facebook to load the next chunk of people.
+      update({ message: 'טוען עוד אנשים…' });
+      const more = await loadMore(dialog, clicked);
+      if (more) {
         idle = 0;
+        update({ message: 'מסמן אנשים…' });
+      } else if (++idle >= settings.idleRounds) {
+        break;
       }
     }
 
