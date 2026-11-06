@@ -16,13 +16,13 @@ async function send(type) {
 }
 
 const STATUS = {
-  idle: (s) => (s.dialogFound ? ['ready', 'חלון ההזמנות פתוח – מוכן'] : ['', 'לחץ על Invite באירוע כדי לפתוח את חלון ההזמנות']),
-  running: () => ['running', 'מסמן אנשים…'],
-  done: () => ['ready', 'הסתיים'],
-  stopped: () => ['', 'נעצר'],
-  error: () => ['', 'שגיאה'],
+  idle: (s) => (s.dialogFound ? ['ready', 'Invite dialog is open. Ready'] : ['', 'Click Invite on the event to open the invite dialog']),
+  running: () => ['running', 'Selecting people…'],
+  done: () => ['ready', 'Finished'],
+  stopped: () => ['', 'Stopped'],
+  error: () => ['', 'Error'],
 };
-const BUTTON = { idle: 'סמן את כולם', running: 'עצור', done: 'סמן שוב', stopped: 'המשך', error: 'נסה שוב' };
+const BUTTON = { idle: 'Select all', running: 'Stop', done: 'Select again', stopped: 'Continue', error: 'Try again' };
 
 function render(s) {
   if (!s) return;
@@ -44,7 +44,7 @@ async function poll() {
   try {
     render(await send('status'));
   } catch {
-    $('status-text').textContent = 'לא ניתן להתחבר לדף. רענן את הדף ונסה שוב.';
+    $('status-text').textContent = 'Can\'t connect to the page. Refresh it and try again.';
   }
 }
 

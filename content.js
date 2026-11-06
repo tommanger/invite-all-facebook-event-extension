@@ -115,7 +115,7 @@
     if (state.phase === 'running') return;
     const dialog = findInviteDialog();
     if (!dialog) {
-      update({ phase: 'error', message: 'לא נמצא חלון הזמנות. פתח את האירוע ולחץ על Invite.' });
+      update({ phase: 'error', message: 'Invite dialog not found. Open the event and click Invite.' });
       return;
     }
 
@@ -124,7 +124,7 @@
     const clicked = new WeakSet();
     let selected = 0;
     let idle = 0;
-    update({ phase: 'running', selected: 0, invitesLeft: getInvitesLeft(dialog), message: 'מסמן אנשים…' });
+    update({ phase: 'running', selected: 0, invitesLeft: getInvitesLeft(dialog), message: 'Selecting people…' });
 
     const limitReached = () => {
       const left = getInvitesLeft(dialog);
@@ -134,7 +134,7 @@
 
     outer: while (!stopRequested && alive) {
       if (!dialog.isConnected) {
-        update({ phase: 'error', message: `חלון ההזמנות נסגר באמצע. סומנו ${selected}.` });
+        update({ phase: 'error', message: `The invite dialog was closed. Selected ${selected}.` });
         return;
       }
       if (limitReached()) break;
@@ -153,26 +153,26 @@
       if (stopRequested || !alive || limitReached()) break;
 
       // Scroll to the bottom and wait for Facebook to load the next chunk of people.
-      update({ message: 'טוען עוד אנשים…' });
+      update({ message: 'Loading more people…' });
       const more = await loadMore(dialog, clicked);
       if (more) {
         idle = 0;
-        update({ message: 'מסמן אנשים…' });
+        update({ message: 'Selecting people…' });
       } else if (++idle >= settings.idleRounds) {
         break;
       }
     }
 
     const left = dialog.isConnected ? getInvitesLeft(dialog) : state.invitesLeft;
-    const leftText = left === null ? '' : ` נותרו ${left} הזמנות.`;
+    const leftText = left === null ? '' : ` ${left} invites left.`;
     if (stopRequested) {
-      update({ phase: 'stopped', invitesLeft: left, message: `נעצר. סומנו ${selected} אנשים.${leftText}` });
+      update({ phase: 'stopped', invitesLeft: left, message: `Stopped. Selected ${selected} people.${leftText}` });
     } else {
-      const why = left === 0 ? 'הגעת למגבלת ההזמנות של פייסבוק.' : settings.maxSelect > 0 && selected >= settings.maxSelect ? 'הגעת למקסימום שהגדרת.' : 'הרשימה נגמרה.';
+      const why = left === 0 ? 'Reached Facebook\'s invite limit.' : settings.maxSelect > 0 && selected >= settings.maxSelect ? 'Reached your max setting.' : 'End of the list.';
       update({
         phase: 'done',
         invitesLeft: left,
-        message: `בוצע! סומנו ${selected} אנשים. ${why}${leftText} עכשיו לחץ על "Send invites".`,
+        message: `Done! Selected ${selected} people. ${why}${leftText} Now click "Send invites".`,
       });
     }
   }
@@ -200,7 +200,7 @@
         --accent: #6d4aff; --accent2: #e8457c; --stop: #e0245e;
         width: 264px; padding: 14px; border-radius: 16px; background: var(--bg); color: var(--fg);
         box-shadow: 0 12px 40px rgba(0,0,0,.22), 0 2px 6px rgba(0,0,0,.08);
-        border: 1px solid var(--line); direction: rtl; animation: pop .18s ease-out;
+        border: 1px solid var(--line); direction: ltr; animation: pop .18s ease-out;
       }
       @media (prefers-color-scheme: dark) {
         .card { --bg: #242526; --fg: #e4e6eb; --muted: #b0b3b8; --line: #3a3b3c; }
@@ -234,17 +234,17 @@
     <div class="card">
       <div class="head">
         <span class="logo">+</span>
-        <span class="title">הזמנת כולם</span>
-        <button class="x" title="הסתר">×</button>
+        <span class="title">Invite All</span>
+        <button class="x" title="Hide">×</button>
       </div>
       <div class="stats">
-        <div class="stat"><span class="num" data-selected>0</span><span class="lbl">סומנו</span></div>
-        <div class="stat"><span class="num" data-left>—</span><span class="lbl">הזמנות נותרו</span></div>
+        <div class="stat"><span class="num" data-selected>0</span><span class="lbl">selected</span></div>
+        <div class="stat"><span class="num" data-left>—</span><span class="lbl">invites left</span></div>
       </div>
       <div class="bar"><i></i></div>
       <div class="msg"></div>
-      <button class="go">סמן את כולם</button>
-      <div class="hint">קיצור מקלדת: Alt+Shift+I</div>
+      <button class="go">Select all</button>
+      <div class="hint">Shortcut: Alt+Shift+I</div>
     </div>`;
 
   const card = root.querySelector('.card');
@@ -259,7 +259,7 @@
     render();
   });
 
-  const BUTTON_TEXT = { idle: 'סמן את כולם', running: 'עצור', done: 'סמן שוב', stopped: 'המשך', error: 'נסה שוב' };
+  const BUTTON_TEXT = { idle: 'Select all', running: 'Stop', done: 'Select again', stopped: 'Continue', error: 'Try again' };
 
   function render() {
     if (!alive) return;
@@ -270,7 +270,7 @@
     card.className = `card ${state.phase}`;
     $selected.textContent = state.selected.toLocaleString();
     $left.textContent = state.invitesLeft === null ? '—' : state.invitesLeft.toLocaleString();
-    $msg.textContent = state.message || (state.phase === 'idle' ? 'חלון ההזמנות פתוח – מוכן.' : '');
+    $msg.textContent = state.message || (state.phase === 'idle' ? 'Invite dialog is open. Ready.' : '');
     $go.textContent = BUTTON_TEXT[state.phase];
   }
 
